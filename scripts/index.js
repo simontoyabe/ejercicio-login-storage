@@ -1,32 +1,77 @@
-// Esta es la base de datos de nuestros usuarios
-const baseDeDatos = {
-  usuarios: [
-    {
-      id: 1,
-      name: "Steve Jobs",
-      email: "steve@jobs.com",
-      password: "Steve123",
-    },
-    {
-      id: 2,
-      name: "Ervin Howell",
-      email: "shanna@melissa.tv",
-      password: "Ervin345",
-    },
-    {
-      id: 3,
-      name: "Clementine Bauch",
-      email: "nathan@yesenia.net",
-      password: "Floppy39876",
-    },
-    {
-      id: 4,
-      name: "Patricia Lebsack",
-      email: "julianne.oconner@kory.org",
-      password: "MysuperPassword345",
-    },
-  ],
-};
+let formulario = document.forms.elForms;
+let h1 = document.querySelector("h1");
+let error = document.querySelector("div#error-container");
+let loader = document.querySelector("div#loader");
+let cerrar = document.querySelector("button#cerrar");
+
+sesionIniciada();
+
+function validarEmail(email) {
+    const regex = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/g;
+    return regex.test(email) ? true : false;
+}
+
+function validarContrasenia(contrasenia) {
+    return (contrasenia.length < 5) ? false : true;
+}
+
+function validarPersona(email, contrasenia) {
+    let usuario = baseDeDatos.usuarios.filter((usuario) => {
+        return (usuario.email === email && usuario.password === contrasenia);
+    });
+    if (usuario.length > 0) {
+        return [true, usuario[0].name];
+    } else {
+        return [false];
+    }
+}
+
+function sesionIniciada() {
+    if (localStorage.getItem("nombre") !== null) {
+        formulario.classList.add("hidden");
+        h1.innerText = `Bienvenido al sitio 😀, ${localStorage.getItem("nombre")}`;
+        cerrar.classList.remove("hidden");
+    }
+}
+
+function validaciones() {
+    const email = formulario.emailInput.value;
+    const contrasenia = formulario.passwordInput.value;
+    const validacionPersona = validarPersona(email, contrasenia);
+    if (validarEmail(email) && validarContrasenia(contrasenia) && validacionPersona[0]) {
+        loader.classList.add("hidden");
+        almacenarInformacion(validacionPersona[1], email);
+        formulario.classList.add("hidden");
+        h1.innerText = `Bienvenido al sitio 😀, ${validacionPersona[1]}`;
+        cerrar.classList.remove("hidden");
+    } else {
+        error.innerHTML = "<small>Alguno de los datos ingresados son incorrectos</small>";
+        loader.classList.add("hidden");
+        error.classList.remove("hidden");
+    }
+
+}
+
+function almacenarInformacion(nombre, email) {
+    localStorage.setItem("nombre", nombre);
+    localStorage.setItem("email", email);
+}
+
+formulario.addEventListener('submit', (evento) => {
+    evento.preventDefault();
+    error.classList.add("hidden");
+    loader.classList.remove("hidden");
+    setTimeout(() => {
+        validaciones();
+    }, 3000);
+})
+
+cerrar.addEventListener('click', () => {
+    localStorage.removeItem("nombre");
+    localStorage.removeItem("email");
+    location.reload();
+});
+
 
 // ACTIVIDAD
 
